@@ -1,12 +1,5 @@
 # Go to bed — 1.7.99 Compatibility Patch
 
-> ## ⚠️ Status: **do not publish until andrelo1 says yes**
->
-> The mod's permissions read *"Modification permission: You must get permission from me before you
-> are allowed to modify my files to improve it."* That is an explicit gate, and it has not been
-> cleared. The build below is finished and verified, but it stays here until the author replies.
-> The message to send is in `nexus/01-permission-request.md`.
-
 **This is not a mod. It is only the recompiled DLL.**
 **It REQUIRES the original mod installed** — [Go to bed](https://www.nexusmods.com/skyrimspecialedition/mods/4224) v2.0.7 by andrelo1.
 
