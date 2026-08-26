@@ -1,0 +1,220 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a2b1ed2..665176f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,7 +4,13 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+ 
+ project(gotobed VERSION 2.0.7.0)
+ 
+-find_package(CommonLibSSE REQUIRED)
++# CommonLibSSE-NG 6.7.0, built from source.
++# The bundled vcpkg overlay port pinned the old Ryan-rsm-McKenzie CommonLibSSE, which only
++# understands Address Library formats 1 and 2 - hence the original error:
++#   REL/Relocation.h(636): Unsupported address library format: 5
++set(ENABLE_SKYRIM_VR OFF)
++set(BUILD_TESTS OFF)
++add_subdirectory(external/CommonLibNG CommonLibNG EXCLUDE_FROM_ALL)
+ find_package(Detours REQUIRED)
+ find_package(nlohmann_json REQUIRED)
+ find_path(JCONTAINERS_INCLUDE_DIRS jcontainers/jc_interface.h)
+@@ -61,7 +67,7 @@ target_precompile_headers("${PROJECT_NAME}"
+ 
+ target_compile_features("${PROJECT_NAME}"
+ 	PRIVATE
+-	cxx_std_20
++	cxx_std_23
+ )
+ 
+ target_include_directories("${PROJECT_NAME}"
+diff --git a/src/Actor.cpp b/src/Actor.cpp
+index 7a32764..66f2a7f 100644
+--- a/src/Actor.cpp
++++ b/src/Actor.cpp
+@@ -6,6 +6,11 @@
+ #include "Settings.h"
+ #include <ranges>
+ 
++// <windows.h> (pulled in transitively) defines GetObject as GetObjectA, which mangles
++// BGSDefaultObjectManager::GetObject at the call sites below. Undo it here, where it
++// is guaranteed to be after every include in this translation unit.
++#undef GetObject
++
+ namespace Gotobed
+ {
+ 	namespace
+diff --git a/src/EquipMask.cpp b/src/EquipMask.cpp
+index 2450b60..6014d95 100644
+--- a/src/EquipMask.cpp
++++ b/src/EquipMask.cpp
+@@ -1,6 +1,11 @@
+ #include "EquipMask.h"
+ #include "JCApi.h"
+ 
++// <windows.h> (pulled in transitively) defines GetObject as GetObjectA, which mangles
++// BGSDefaultObjectManager::GetObject at the call sites below. Undo it here, where it
++// is guaranteed to be after every include in this translation unit.
++#undef GetObject
++
+ namespace Gotobed
+ {
+ 	bool EquipMask::operator()(EquipParams const& a_params) const {
+@@ -10,7 +15,8 @@ namespace Gotobed
+ 
+ 		switch (a_params.item->GetFormType()) {
+ 			case RE::FormType::Armor: {
+-				auto slotMask = static_cast<std::uint32_t>(static_cast<RE::TESObjectARMO*>(a_params.item)->GetSlotMask());
++				// GetSlotMask() returns a REX::EnumSet in CommonLibSSE-NG; underlying() is the raw mask.
++				auto slotMask = static_cast<RE::TESObjectARMO*>(a_params.item)->GetSlotMask().underlying();
+ 
+ 				if (!slotMask) {
+ 					break;
+diff --git a/src/Fixes.cpp b/src/Fixes.cpp
+index a672666..e6278c5 100644
+--- a/src/Fixes.cpp
++++ b/src/Fixes.cpp
+@@ -17,13 +17,15 @@ namespace Gotobed::Fixes
+ 		};
+ 
+ 		bool TESObjectREFR::SetMarkerReserved(std::uint32_t a_marker, RE::Actor* a_actor, bool a_reserved, bool a_ignoreUsed) {
+-			auto middleHigh = a_actor->currentProcess->middleHigh;
++			// CommonLibSSE-NG reaches Actor's runtime data through an accessor, because its base
++			// offset shifts between runtimes (0xE0 before 1.6.629, 0xE8 after).
++			auto middleHigh = a_actor->GetActorRuntimeData().currentProcess->middleHigh;
+ 
+-			if (middleHigh && middleHigh->unk2E4 != a_marker) {					
+-				if (middleHigh->unk2E4 != -1) {
+-					Hooks::SetMarkerReserved.call_orig(this, middleHigh->unk2E4, nullptr, false, false);
++			if (middleHigh && middleHigh->reservationSlot != a_marker) {					
++				if (middleHigh->reservationSlot != -1) {
++					Hooks::SetMarkerReserved.call_orig(this, middleHigh->reservationSlot, nullptr, false, false);
+ 				}
+-				middleHigh->unk2E4 = a_marker;
++				middleHigh->reservationSlot = a_marker;
+ 			}
+ 
+ 			return Hooks::SetMarkerReserved.call_orig(this, a_marker, a_actor, a_reserved, a_ignoreUsed);
+diff --git a/src/MenuOpenHandler.cpp b/src/MenuOpenHandler.cpp
+index 292eb19..7543bba 100644
+--- a/src/MenuOpenHandler.cpp
++++ b/src/MenuOpenHandler.cpp
+@@ -14,7 +14,13 @@ namespace Gotobed
+ 	namespace detail
+ 	{
+ 		bool IsKeyPressed(std::uint32_t a_key) {
+-			return RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->IsPressed(a_key);
++			// CommonLibSSE-NG declares BSWin32KeyboardDevice's virtual overrides without
++			// defining them - they are the game's own vtable slots, and the class is only ever
++			// used through a pointer the game hands out. Calling its IsPressed() drags that
++			// translation unit into the link, and MSVC then has to emit the whole vtable,
++			// which cannot resolve. This is exactly the check IsPressed() performs.
++			const auto& keys = RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->GetRuntimeData().curState;
++			return a_key < sizeof(keys) && (keys[a_key] & 0x80) != 0;
+ 		}
+ 
+ 		bool IsSleepKey(RE::ButtonEvent* a_event) {
+@@ -89,7 +95,10 @@ namespace Gotobed
+ 			return false;
+ 		}
+ 
+-		if (player->jailSentence <= 0 || (player->unkBD8 & 0x40) != 0) {
++		// Both now go through CommonLibSSE-NG accessors. That matters on 1.7.99: PlayerFlags
++		// moved from offset 0xBD8 to 0xBE0, so the old direct read would have hit the wrong
++		// bytes. Bit 0x40 of that first flags byte is `escaping`.
++		if (player->GetPlayerRuntimeData().jailSentence <= 0 || player->GetPlayerFlags().escaping) {
+ 			return false;
+ 		}
+ 
+diff --git a/src/init.cpp b/src/init.cpp
+index bd05de9..75f14e9 100644
+--- a/src/init.cpp
++++ b/src/init.cpp
+@@ -32,7 +32,19 @@ namespace Gotobed
+ 		// don't show serve time message on bed activation
+ 		REL::safe_write(Offsets::TESFurniture::Activate.address() + 0x0113, static_cast<std::uint8_t>(0xEB));
+ 		// get up from bed using movement keys
+-		REL::safe_write(Offsets::PlayerCharacter::Update.address() + 0x063E, static_cast<std::uint8_t>(0x02));
++		// This byte is the third octet of the immediate in `and eax, 0x3C000`, which isolates the
++		// sit/sleep state out of the actor flags. Writing 0x02 over the 0x03 turns the mask into
++		// 0x2C000, clearing bit 0x10000 so Sleeping (state 7, 0x1C000) compares equal to Sitting
++		// (state 3, 0xC000) in the `cmp eax, 0xC000` that follows - which is what lets movement
++		// keys get the player out of a bed.
++		//
++		// That block moved 7 bytes in Skyrim 1.7.99. At the old offset 0x63E the byte is now the
++		// 0x0F of the following `jne`, and writing 0x02 there would corrupt the branch into
++		// `add al, [rbp+0x9B]`. Verified by disassembling the 1.7.99 binary.
++		REL::safe_write(
++			Offsets::PlayerCharacter::Update.address() +
++				(REL::Module::IsAtLeast(SKSE::RUNTIME_SSE_1_7_99) ? 0x0637 : 0x063E),
++			static_cast<std::uint8_t>(0x02));
+ 		// don't allow sleeping if bed is reserved
+ 		REL::safe_write(Offsets::PlayerCharacter::CanSleepWait.address() + 0x01B0, static_cast<std::uint8_t>(0x00));
+ 		// don't pause character animations while sleeping
+diff --git a/src/main.cpp b/src/main.cpp
+index db47f16..d168a05 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -9,7 +9,13 @@ namespace
+ 
+ 		version.PluginVersion({ Version::MAJOR, Version::MINOR, Version::PATCH, Version::BUILD });
+ 		version.PluginName(Project::NAME);
+-		version.UsesAddressLibrary(true);
++		// CommonLibSSE-NG 6.7.0 dropped the bool parameter. PluginVersionData also defaults
++		// versionIndependenceEx to kVersionIndependentEx_AddressLibraryV5, which is what
++		// Skyrim 1.7.99 requires before it will load the plugin at all.
++		version.UsesAddressLibrary();
++		// The shipped 2.0 DLL declared versionIndependence = 5 (AddressLibraryPostAE plus
++		// StructsPost629). Keep that identical so SKSE sees the same plugin.
++		version.UsesUpdatedStructs();
+ 
+ 		return version;
+ 	}
+diff --git a/src/pch.h b/src/pch.h
+index 2c75d82..86e7082 100644
+--- a/src/pch.h
++++ b/src/pch.h
+@@ -1,11 +1,17 @@
+ #pragma once
+ 
++// These have to come first: CommonLibSSE-NG now includes <windows.h> itself, so setting
++// them after "RE/Skyrim.h" is too late and wingdi's GetObject macro rewrites
++// BGSDefaultObjectManager::GetObject into GetObjectA.
++#define NOMINMAX
++#define NOGDI
++#define WIN32_LEAN_AND_MEAN
++
+ #include "RE/Skyrim.h"
+ #include "SKSE/SKSE.h"
+ 
+-#define NOMINMAX
+-#define NOGDI
+ #include <windows.h>
++#undef GetObject
+ #include "detours/detours.h"
+ 
+ #include "nlohmann/json.hpp"
+diff --git a/vcpkg.json b/vcpkg.json
+index 7c5def0..0ff8a71 100644
+--- a/vcpkg.json
++++ b/vcpkg.json
+@@ -1,10 +1,16 @@
+ {
+ 	"name": "gotobed",
+-	"version": "1.0.0.0",
++	"version": "2.0.7.0",
++	"builtin-baseline": "00c5775211f45cd08b37fce0484b4cb940e422ab",
+ 	"dependencies": [
+-		"commonlibsse",
+ 		"detours",
+ 		"jcontainers",
+-		"nlohmann-json"
++		"nlohmann-json",
++		"spdlog",
++		"fmt",
++		"directxmath",
++		"directxtk",
++		"rapidcsv",
++		"xbyak"
+ 	]
+-}
+\ No newline at end of file
++}

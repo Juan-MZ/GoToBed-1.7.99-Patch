@@ -1,0 +1,65 @@
+Go to bed
+Copyright (c) 2022 andrelo1
+The original mod is licensed under the MIT License (see LICENSE-upstream-MIT.txt).
+
+*** STATUS: NOT READY FOR RELEASE - DO NOT PUBLISH THIS BUILD ***
+
+andrelo1's mod page states: "Modification permission: You must get permission from me
+before you are allowed to modify my files to improve it." That permission has not been
+asked for and granted yet. See nexus/01-permission-request.md.
+
+The build itself is finished and verified. It is the permission that is outstanding.
+
+--------------------------------------------------------------------------------
+
+The compiled gotobed.dll statically links CommonLibSSE-NG 6.7.0 (commit 3d8161461791),
+which is GPL-3.0-or-later WITH a Modding Exception and a GPL-3.0 Linking Exception
+(see LICENSE-CommonLibSSE-NG-EXCEPTIONS.md).
+
+MIT is GPL-compatible, so andrelo1's code can be combined into a GPL-3 work. That does
+not relicense their mod - Go to bed stays MIT - but the combined binary distributed
+here would be GPL-3.0-or-later (see LICENSE).
+
+This package is NOT the mod. It is a compatibility patch containing only the SKSE
+plugin (gotobed.dll), recompiled from the official source.
+
+It REQUIRES the original mod installed. None of the author's assets are redistributed
+here - no ESP, no Papyrus scripts, no MCM, no meshes.
+
+Upstream source: https://github.com/andrelo1/gotobed-se
+
+BUILT FROM THE 2.0.7 RELEASE COMMIT:
+Built from commit fba07fff, which declares VERSION 2.0.7.0 - the version published on
+Nexus - and NOT from main. main drops JContainers, moves the sleepwear system out, and
+changes the Papyrus API, so a DLL built from it would leave the shipped MCM calling
+functions that no longer exist. The rebuild declares itself 2.0.0.112, the same as the
+shipped DLL, and a full string comparison shows nothing of the mod missing.
+
+CORRESPONDING SOURCE (GPL-3.0, section 6):
+The complete corresponding source for this binary is in source/complete-source/, and
+the diff against upstream is source/GoToBed-1.7.99-compat.patch. Section 6(d) allows
+offering it from a designated place rather than bundling it with the binary.
+
+CHANGES FROM THE ORIGINAL:
+  - Rebuilt against CommonLibSSE-NG 6.7.0 for Address Library format 5 and the 1.7.99
+    layouts; CommonLib is built from source. C++20 -> C++23.
+  - init.cpp: the PlayerCharacter::Update byte patch is re-derived for 1.7.99. That
+    block moved 7 bytes; the old offset 0x63E now lands on a `jne` opcode and writing
+    to it would destroy the branch. Uses 0x637 on 1.7.99, 0x63E on AE 1.6.x.
+  - MenuOpenHandler.cpp: jailSentence and the player flags now go through CommonLib
+    accessors. The flags moved from offset 0xBD8 to 0xBE0 on 1.7.99, so the previous
+    direct read would have tested the wrong bytes.
+  - Fixes.cpp: Actor::currentProcess via GetActorRuntimeData(); unk2E4 is now named
+    reservationSlot at the same offset 0x2E4.
+  - EquipMask.cpp: GetSlotMask() returns a REX::EnumSet, so it needs .underlying().
+  - Actor.cpp / EquipMask.cpp: #undef GetObject, because <windows.h> now arrives via
+    CommonLibSSE-NG and wingdi's macro rewrote BGSDefaultObjectManager::GetObject.
+  - MenuOpenHandler.cpp: the keyboard IsPressed() check is inlined, because calling
+    CommonLib's drags in a translation unit whose vtable cannot be emitted.
+  - main.cpp: UsesAddressLibrary() lost its bool parameter; UsesUpdatedStructs() keeps
+    versionIndependence identical to the shipped DLL.
+  - vcpkg.json: pinned baseline, commonlibsse overlay port removed.
+
+No feature was added, removed, or redesigned.
+
+Not affiliated with andrelo1 or Bethesda.
