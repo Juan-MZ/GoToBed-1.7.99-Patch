@@ -66,7 +66,7 @@ Plus C++20 → C++23, and `UsesAddressLibrary()` lost its bool parameter.
 your Nexus release — rather than `main`. `main` drops JContainers, moves sleepwear out, and changes
 the Papyrus API (`Keys_GetSleepKey` on `GTB_Settings` instead of `GetSleepKey`), so a DLL built from
 it would load fine and then leave the shipped MCM calling functions that no longer exist. The 2.0.7
-rebuild declares itself 2.0.0.112, the same as your shipped DLL, and a full string comparison shows
+rebuild declares itself 2.0.7.0, the same as your shipped DLL, and a full string comparison shows
 nothing of the mod missing.
 
 **One licensing note.** CommonLibSSE-NG changed from MIT to GPL-3.0-or-later in August 2026. Because

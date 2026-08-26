@@ -32,7 +32,7 @@ BUILT FROM THE 2.0.7 RELEASE COMMIT:
 Built from commit fba07fff, which declares VERSION 2.0.7.0 - the version published on
 Nexus - and NOT from main. main drops JContainers, moves the sleepwear system out, and
 changes the Papyrus API, so a DLL built from it would leave the shipped MCM calling
-functions that no longer exist. The rebuild declares itself 2.0.0.112, the same as the
+functions that no longer exist. The rebuild declares itself 2.0.7.0, the same as the
 shipped DLL, and a full string comparison shows nothing of the mod missing.
 
 CORRESPONDING SOURCE (GPL-3.0, section 6):

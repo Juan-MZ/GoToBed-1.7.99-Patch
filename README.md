@@ -31,7 +31,7 @@ fine and then leaves the MCM calling functions that no longer exist, with the sl
 
 So this is built from commit **`fba07fff`**, which declares `VERSION 2.0.7.0` — the version on Nexus.
 
-The check that settles it: the rebuilt DLL declares itself **2.0.0.112**, byte-for-byte the same
+The check that settles it: the rebuilt DLL declares itself **2.0.7.0**, byte-for-byte the same
 version the shipped `gotobed.dll` declares. Comparing every printable string between the two, the
 only ones missing from the rebuild are C-runtime and CommonLibSSE internals — **not one mod string**.
 JContainers, the sleepwear data, and all the Papyrus entry points are present and unchanged.
@@ -119,7 +119,7 @@ the mod's own vcpkg overlay port, which only understands formats 1 and 2 and rej
   translation unit into the link and MSVC then cannot emit the vtable. The mod now performs the
   identical check (`curState[key] & 0x80`) directly.
 
-**No feature was added, removed, or redesigned.** The DLL still reports itself as 2.0.0.112.
+**No feature was added, removed, or redesigned.** The DLL still reports itself as 2.0.7.0.
 
 ## Verification
 
