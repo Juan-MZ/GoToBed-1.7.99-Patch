@@ -36,9 +36,10 @@ version the shipped `gotobed.dll` declares. Comparing every printable string bet
 only ones missing from the rebuild are C-runtime and CommonLibSSE internals — **not one mod string**.
 JContainers, the sleepwear data, and all the Papyrus entry points are present and unchanged.
 
-## Who needs this (once it is releasable)
+## Who needs this
 
-You are on **Skyrim SE/AE 1.7.99** (the 20 August 2026 update) and Go to bed throws:
+You are on **Skyrim SE/AE 1.7.99 or 1.7.104** (the 20 and 27 August 2026 updates) and Go to bed
+throws:
 
 ```
 REL/Relocation.h(636): Unsupported address library format: 5
@@ -49,6 +50,11 @@ Note this is a *different* error from most broken plugins. The DLL finds and ope
 only understands formats 1 and 2.
 
 If you are still on 1.6.x, you do **not** need this patch — keep using the official release.
+
+**On 1.7.104:** the same file works. All eight byte patches were re-verified against the 1.7.104
+binary by re-simulating each write; every one still lands on the right instruction with the right
+length, and all 20 address library IDs still resolve. You need Address Library **All in One v13**
+or newer (it adds `versionlib-1-7-104-0.bin`) and SKSE64 **2.3.1**.
 
 ## Requirements
 

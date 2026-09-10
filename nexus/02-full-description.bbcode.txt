@@ -1,0 +1,203 @@
+[center][size=5][b]Go to bed — 1.7.99 / 1.7.104 Compatibility Patch[/b][/size]
+[i]Unofficial patch. Not a mod. The original mod is required.[/i][/center]
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]⚠ Read this first[/b][/size]
+
+[b]This is not a standalone mod.[/b] It is [b]only the recompiled DLL[/b] for Go to bed, so the mod works again on Skyrim SE/AE [b]1.7.99 and 1.7.104[/b] (the 20 and 27 August 2026 updates).
+
+You [b]must[/b] have the original mod installed: [url=https://www.nexusmods.com/skyrimspecialedition/mods/4224]Go to bed[/url] v2.0.7 by [b]andrelo1[/b].
+
+This patch contains [b]none[/b] of andrelo1's assets — no ESP, no Papyrus scripts, no MCM, no meshes. All of that still comes from their mod. The only file installed here is a rebuilt [font=Courier New]gotobed.dll[/font].
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]All credit belongs to andrelo1[/b][/size]
+
+Every feature and every design decision in Go to bed is andrelo1's. I added nothing, removed nothing, and redesigned nothing. I rebuilt their code against a current library and fixed the places the new game version broke it. That is the whole contribution — plumbing, not creativity.
+
+[quote][b]This is a stopgap, not a fork, and not an attempt to take over the mod.[/b] If andrelo1 updates it, use their version and drop this one. If they would rather this were not here, it comes down the same day, no questions asked.[/quote]
+
+Everything I did is public and reviewable before you download anything:
+[b][url=https://github.com/Juan-MZ/GoToBed-1.7.99-Patch]github.com/Juan-MZ/GoToBed-1.7.99-Patch[/url][/b]
+
+The full diff against andrelo1's release commit is in there, so they can merge it directly if they ever want to. It is theirs to use, with no conditions from me.
+
+[b]Permissions note:[/b] the permission settings on [i]this[/i] page cover [i]this patch[/i] only. They grant nobody any rights over Go to bed itself, which stays under andrelo1's own terms on their page.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]How this patch was made[/b][/size]
+
+[b]It was made with AI assistance.[/b] I am saying so up front, unprompted, so you can weigh it yourself — every patch I have put out in this series says the same.
+
+What that does and does not mean:
+
+[list]
+[*]The claims under [b]Verification[/b] are not a model's say-so. Each one was checked against the real Skyrim executable by disassembly, and the evidence is public in the repository — offsets, instruction sequences and the reasoning behind each conclusion. The bug described below was found that way, not guessed at.
+[*]It has [b]not[/b] been play-tested through a full playthrough. That limit is real and I am not going to bury it.
+[*]andrelo1 has [b]not[/b] reviewed these changes.
+[/list]
+
+If that is not a trade you want to make, don't install it. That is a perfectly reasonable call and I would not argue with it.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]Do you actually need this?[/b][/size]
+
+Install it only if you are on [b]Skyrim SE/AE 1.7.99 or 1.7.104[/b] and Go to bed throws this on startup:
+
+[code]REL/Relocation.h(636): Unsupported address library format: 5[/code]
+
+[b]Note this is a different error from most broken plugins.[/b] The DLL finds and opens the new address library file — it just refuses it, because it was built against a CommonLibSSE that only understands the older formats. If you were searching for "failed to open address library file" and landed here, this is still the right patch; the message just differs.
+
+If you are still on 1.6.x, you do [b]not[/b] need this — keep using andrelo1's official release.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]✅ Works on Skyrim 1.7.104 too[/b][/size]
+
+[b]The same file covers 1.7.104[/b] (the 27 August 2026 update). Nothing had to be rebuilt — but I re-verified it against the new executable rather than assuming.
+
+1.7.104 moved [i]every[/i] function in the game. It did not change any data structure, and it did not change the code [i]inside[/i] the functions this patch touches. Every offset here is expressed relative to an Address Library ID; the ID relocates itself, so each patch still lands in exactly the same place. I confirmed that by re-simulating all eight byte writes against the real 1.7.104 binary — all eight still land on the right instruction, with the right length.
+
+[b]What you do need is the updated Address Library[/b] — [b]All in One v13[/b] or newer, which adds [font=Courier New]versionlib-1-7-104-0.bin[/font] — plus [b]SKSE64 2.3.1[/b].
+
+[quote]If you see [i]"DLL plugins you have installed require a new version of the Address Library"[/i], that is the Address Library being out of date, not this patch. Update it and the message goes away.[/quote]
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]Requirements[/b][/size]
+
+[list]
+[*][b]Go to bed 2.0.7[/b] — the original mod. Mandatory.
+[*][b]SKSE64 2.3.1[/b] on 1.7.104, or 2.3.0 on 1.7.99
+[*][b]Address Library for SKSE Plugins[/b] — [b]All in One v13[/b] or newer on 1.7.104 (it adds [font=Courier New]versionlib-1-7-104-0.bin[/font]); v12 is enough on 1.7.99
+[*][b]JContainers SE[/b] — the mod uses it, and it is not shipped here
+[*][b]SkyUI[/b] — for the MCM
+[/list]
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]Installation[/b][/size]
+
+Install the original mod 2.0.7 first, then add this patch on top. Use the archive as-is, without extracting it.
+
+[b]Vortex[/b]
+[list=1]
+[*]Mods tab → [i]Install From File[/i] → pick the archive → Enable.
+[*]Vortex will report a [b]file conflict[/b] with the original mod — both ship the same DLL.
+[*]When prompted, set this patch to [i]Load After[/i] the original mod so [b]this patch wins[/b].
+[/list]
+
+[quote][b]This is the step people get wrong.[/b] If you pick the other option, Vortex keeps deploying the old DLL and it will look like the patch did nothing at all.[/quote]
+
+[b]Mod Organizer 2[/b]
+[i]Install a new mod from an archive[/i], then place this patch [b]below[/b] the original mod in the left pane. In MO2, lower wins.
+
+[b]Manual[/b]
+Copy [font=Courier New]SKSE\Plugins\gotobed.dll[/font] over the existing one — [b]only[/b] if you installed the mod manually. With Vortex or MO2, always go through the manager.
+
+[b]Uninstalling[/b]
+Disable or remove the patch and the original DLL comes back. Nothing else is touched, and no save-game data is involved — only the plugin binary is swapped.
+
+[b]Checking that it worked[/b]
+Launch the game. If it reaches the main menu with no error box, it worked. The plugin writes [font=Courier New]Documents\My Games\Skyrim Special Edition\SKSE\gotobed.log[/font].
+
+Then sleep in a bed and check the three things this mod exists for: no sleep/wait menu popping up when you activate the bed, the sleepwear swap happening, and [b]getting out of bed with a movement key[/b]. That last one matters most here — see Verification.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]Built from the 2.0.7 release, not from [font=Courier New]main[/font][/b][/size]
+
+This matters, and it is the reason the patch is safe to use with the mod people actually have.
+
+andrelo1's [font=Courier New]main[/font] branch is two years past the release and carries unpublished work — [i]"drop the use of JContainers"[/i], [i]"move sleepwear into separate module"[/i], [i]"remove UIUtil"[/i]. It also changed the [b]Papyrus API[/b]: [font=Courier New]main[/font] registers [font=Courier New]Keys_GetSleepKey[/font] on script class [font=Courier New]GTB_Settings[/font], while the released 2.0.7 scripts call [font=Courier New]GetSleepKey[/font] on [font=Courier New]GTB_UIUtil[/font] / [font=Courier New]GTB_JCDomain[/font].
+
+A DLL built from [font=Courier New]main[/font] would load perfectly and then leave the MCM you have calling functions that no longer exist, with the sleepwear system gone. So this is built from the commit that declares [b]VERSION 2.0.7.0[/b] — the version on Nexus.
+
+The check that settles it: the rebuilt DLL declares itself [b]2.0.7.0[/b], the same as the shipped one, and comparing every printable string between the two, the only ones missing from the rebuild are C-runtime and library internals — [b]not one mod string[/b]. JContainers, the sleepwear data and all the Papyrus entry points are present and unchanged.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]What was broken[/b][/size]
+
+Two separate things, and the second is the interesting one.
+
+[b]1. Address Library format 5.[/b] For 1.7.99 the address library moved to a new on-disk format — a 96-byte header and a dense array indexed directly by ID. A 1.7.99 [font=Courier New]versionlib-1-7-99-0.bin[/font] begins with the bytes [font=Courier New]05 00 00 00[/font]. The released DLL was built against an old CommonLibSSE, pinned by the mod's own build config, which only understands formats 1 and 2 and rejects the file outright.
+
+[b]2. One of the mod's own byte patches lands on the wrong instruction.[/b] This is a real defect in the released code, not something the update merely shifted, and a plain recompile would [b]not[/b] have fixed it.
+
+Go to bed writes a single byte into [font=Courier New]PlayerCharacter::Update[/font] to let a movement key get you out of a bed. The byte is meant to be part of the immediate in an [font=Courier New]and eax, 0x3C000[/font] instruction — turning the mask into [font=Courier New]0x2C000[/font], so that the Sleeping state compares equal to Sitting in the check that follows.
+
+On 1.7.99 that block moved [b]seven bytes[/b]. At the old offset the byte is now part of the [font=Courier New]jne[/font] that follows, and writing to it would have rewritten that conditional branch into a completely different instruction — destroying the check rather than adjusting it.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]What was changed[/b][/size]
+
+[list]
+[*][b]Rebuilt against CommonLibSSE-NG 6.7.0[/b] — format 5 support plus the 1.7.99 layouts, replacing the old pinned CommonLibSSE. C++20 → C++23.
+[*][b]The [font=Courier New]PlayerCharacter::Update[/font] byte patch re-derived[/b], and gated at runtime so 1.6.x keeps the offset that is correct there. This is the substantive fix.
+[*][b]Player flags now read through an accessor.[/b] Not cosmetic: on 1.7.99 those flags moved to a different offset inside the player object, so the mod's direct read would have tested the wrong bytes. The bit it checks turns out to be named [i]escaping[/i], which matches exactly what the check is doing.
+[*][b]Three CommonLib renames[/b] — the actor's current process, a reservation-slot field (same offset, and the name confirms the mod's use of it), and an equipment-slot mask that now returns a typed set.
+[*][b]A [font=Courier New]<windows.h>[/font] macro collision fixed.[/b] A Windows GDI macro was quietly rewriting one of the game's own function names in the mod's source.
+[*][b]One keyboard check inlined.[/b] The library declares those virtual overrides without defining them — they are the game's own vtable slots — so calling one broke the link. The mod now performs the identical check directly.
+[/list]
+
+[b]No feature was added, removed, or redesigned.[/b] The DLL still reports itself as 2.0.7.0.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]Verification[/b][/size]
+
+Every patch site was checked by disassembling a real [font=Courier New]SkyrimSE.exe[/font] — first 1.7.99, then again on 1.7.104 — and by simulating each write on the real bytes and disassembling the result.
+
+[list]
+[*][b]All 20[/b] address library IDs the mod uses resolve on both versions.
+[*][b]Seven of the eight byte patches were already correct[/b] and still are. Each keeps its instruction boundary and its length after the write: two jumps in the furniture activation path, a flag set in the sleep/wait check, three conditional branches turned into unconditional ones, and a five-byte call that targets exactly the function the hook means to replace.
+[*][b]The eighth is the one described above[/b], and it is now re-derived and gated by game version.
+[*]The furniture jump is worth spelling out: the mod writes a two-byte relative jump, and on both 1.7.99 and 1.7.104 it lands precisely on the instruction boundary after the sleep-menu call and its return value. The displacement is exactly right, by construction rather than by luck.
+[*]The rebuilt DLL declares the Address Library v5 support that 1.7.99 and later require; the shipped original does not, which is why it fails.
+[/list]
+
+[b]It has not been play-tested through a full playthrough.[/b] Everything above is static analysis — thorough, but not the same as hours in game. [b]Back up your save[/b] before using this on a main playthrough, and please report anything odd in the comments — [b]especially getting out of bed with a movement key[/b], since that is the one patch whose location changed.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]Licensing[/b][/size]
+
+Go to bed is [b]MIT[/b] (© andrelo1) and [b]stays MIT[/b] — its licence ships in the download.
+
+This patch is [b]GPL-3.0-or-later[/b], and that is not a choice: the DLL statically links CommonLibSSE-NG 6.7.0, which is GPL-3.0-or-later with the Modding and Linking Exceptions. MIT is GPL-compatible, so the code can be combined — but the resulting binary has to go out under GPL-3. That does not relicense andrelo1's mod; it only sets the terms of the binary here.
+
+GPL-3 section 6 requires the complete corresponding source. It is published in the repository linked above, and section 6(d) allows offering it from a designated place rather than bundling it with the binary. The download carries the GPL-3 text, the CommonLibSSE-NG exceptions, andrelo1's MIT licence and a notice listing every change.
+
+Not affiliated with andrelo1 or Bethesda.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]Source[/b][/size]
+
+[list]
+[*][b]This patch:[/b] [url=https://github.com/Juan-MZ/GoToBed-1.7.99-Patch]github.com/Juan-MZ/GoToBed-1.7.99-Patch[/url] — every change as a unified diff, plus the complete source.
+[*][b]Upstream (andrelo1's original):[/b] [url=https://github.com/andrelo1/gotobed-se]github.com/andrelo1/gotobed-se[/url]
+[/list]
+
+The optional PDB download only makes crash logs show function names. It is not needed to play.
+
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+[size=4][b]Credits[/b][/size]
+
+[list]
+[*][b]andrelo1[/b] — creator of Go to bed. The mod is entirely their work, and all credit for it is theirs.
+[*][b]ryobg / silvericed[/b] — JContainers, which the mod uses.
+[*][b]meh321[/b] — Address Library for SKSE Plugins.
+[*][b]CommonLibSSE-NG contributors[/b] (CharmedBaryon, alandtse, powerof3, Ryan-rsm-McKenzie) — the 1.7.99 and format-5 support this patch depends on.
+[*][b]The SKSE team[/b] — SKSE64.
+[/list]
+
+[center][i]Made for the community. Nothing asked in return.
+All credit to andrelo1 — this only exists so their mod can keep being played.[/i][/center]

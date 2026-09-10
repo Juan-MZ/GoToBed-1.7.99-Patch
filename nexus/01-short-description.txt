@@ -1,0 +1,28 @@
+===============================================================
+SHORT DESCRIPTION  ->  Nexus "Summary" field
+Nexus limits this field to roughly 255 characters.
+===============================================================
+
+Unofficial patch that gets Go to bed working again on Skyrim 1.7.99 and 1.7.104. Only the recompiled DLL - the original mod is required. It also fixes one of the mod's own byte patches, which lands wrong on 1.7.99. Made with AI assistance.
+
+---------------------------------------------------------------
+247 characters. Fits.
+
+NOTES FOR THE PAGE:
+
+  Lead with the bug fix, not the recompile. Every patch in this
+  series is "a recompile"; this one found a real defect in the
+  mod's own code - a safe_write that lands on the 0F of a jne on
+  1.7.99 and would have destroyed the conditional. That is the
+  thing worth someone's attention, and it is also the strongest
+  argument that this was done carefully.
+
+  Second most important: it is built from the 2.0.7 release
+  commit, NOT from main. main changed the Papyrus API and dropped
+  the sleepwear system, so a DLL built from it would load fine
+  and then leave the shipped MCM calling functions that no longer
+  exist. Say so - it is the reason the patch is safe with the mod
+  people actually have.
+
+  Do not promise it is play-tested. It is not.
+===============================================================

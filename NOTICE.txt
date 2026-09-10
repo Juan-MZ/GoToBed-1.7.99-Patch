@@ -5,10 +5,18 @@ The original mod is licensed under the MIT License (see LICENSE-upstream-MIT.txt
 *** STATUS: NOT READY FOR RELEASE - DO NOT PUBLISH THIS BUILD ***
 
 andrelo1's mod page states: "Modification permission: You must get permission from me
-before you are allowed to modify my files to improve it." That permission has not been
-asked for and granted yet. See nexus/01-permission-request.md.
+before you are allowed to modify my files to improve it."
 
-The build itself is finished and verified. It is the permission that is outstanding.
+andrelo1 has not logged in to Nexus since 30 April 2025. A permission message was written
+(nexus/01-permission-request.md) and no reply has been received. Their source, however, is
+published under the MIT licence at github.com/andrelo1/gotobed-se, which permits building
+and redistributing this DLL; none of their Nexus files are redistributed here.
+
+Those two facts point in different directions, and the tension is documented rather than
+resolved unilaterally: see nexus/00-READ-FIRST-permission-status.md, and
+nexus/02-message-to-nexus-staff.md for the enquiry to Nexus staff that settles it.
+
+The build itself is finished and verified on both 1.7.99 and 1.7.104.
 
 --------------------------------------------------------------------------------
 
