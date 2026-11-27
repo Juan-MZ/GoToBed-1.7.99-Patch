@@ -68,12 +68,16 @@ namespace Gotobed
 		}
 
 		auto player = RE::PlayerCharacter::GetSingleton();
-
-		if (player->actorState1.lifeState == RE::ACTOR_LIFE_STATE::kDying || player->actorState1.lifeState == RE::ACTOR_LIFE_STATE::kDead) {
+		auto actorState = player->AsActorState();
+		if (!actorState) {
 			return false;
 		}
 
-		if (player->actorState1.sitSleepState != RE::SIT_SLEEP_STATE::kIsSleeping) {
+		if (actorState->GetLifeState() == RE::ACTOR_LIFE_STATE::kDying || actorState->GetLifeState() == RE::ACTOR_LIFE_STATE::kDead) {
+			return false;
+		}
+
+		if (actorState->GetSitSleepState() != RE::SIT_SLEEP_STATE::kIsSleeping) {
 			return false;
 		}
 
@@ -90,8 +94,12 @@ namespace Gotobed
 		}
 
 		auto player = RE::PlayerCharacter::GetSingleton();
+		auto actorState = player->AsActorState();
+		if (!actorState) {
+			return false;
+		}
 
-		if (player->actorState1.lifeState == RE::ACTOR_LIFE_STATE::kDying || player->actorState1.lifeState == RE::ACTOR_LIFE_STATE::kDead) {
+		if (actorState->GetLifeState() == RE::ACTOR_LIFE_STATE::kDying || actorState->GetLifeState() == RE::ACTOR_LIFE_STATE::kDead) {
 			return false;
 		}
 

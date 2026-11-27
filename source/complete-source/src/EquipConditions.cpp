@@ -5,7 +5,12 @@
 namespace Gotobed
 {
 	bool EquipConditions::operator()(Actor& a_actor) {
-		if (a_actor.actorState1.sitSleepState < RE::SIT_SLEEP_STATE::kWantToSleep || a_actor.actorState1.sitSleepState >  RE::SIT_SLEEP_STATE::kWantToWake) {
+		auto actorState = a_actor.AsActorState();
+		if (!actorState) {
+			return false;
+		}
+		auto sitSleepState = actorState->GetSitSleepState();
+		if (sitSleepState < RE::SIT_SLEEP_STATE::kWantToSleep || sitSleepState > RE::SIT_SLEEP_STATE::kWantToWake) {
 			return false;
 		}
 
