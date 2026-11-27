@@ -13,7 +13,8 @@ namespace Gotobed
 		Hooks::OnSitSleepStateChange.call_orig(this, a_actor, a_newState, a_refHandle, a_marker);
 
 		if (a_actor) {
-			auto sitSleepState = a_actor->actorState1.sitSleepState;
+			auto actorState = a_actor->AsActorState();
+			auto sitSleepState = actorState ? actorState->GetSitSleepState() : RE::SIT_SLEEP_STATE::kNormal;
 			if (sitSleepState == RE::SIT_SLEEP_STATE::kNormal || sitSleepState == RE::SIT_SLEEP_STATE::kWantToSleep || sitSleepState == RE::SIT_SLEEP_STATE::kIsSleeping) {
 				a_actor->UpdateOutfit();
 			}
